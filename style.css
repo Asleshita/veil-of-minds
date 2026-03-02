@@ -1,0 +1,65 @@
+body {
+    background: black;
+    color: white;
+    font-family: Georgia, serif;
+    text-align: center;
+    padding: 60px;
+}
+
+h1 {
+    color: crimson;
+    font-size: 50px;
+    letter-spacing: 3px;
+}
+
+.subtitle {
+    color: gray;
+    margin-bottom: 40px;
+}
+
+button {
+    background-color: darkred;
+    color: white;
+    padding: 12px 25px;
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: crimson;
+}
+
+.hidden {
+    display: none;
+}
+
+#secret-clue {
+    color: black;
+    cursor: pointer;
+    margin-top: 50px;
+}
+#music-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid darkred;
+  color: white;
+  font-size: 22px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 999;
+  transition: all 0.3s;
+}
+
+#music-btn:hover {
+  background: rgba(139,0,0,0.5);
+  box-shadow: 0 0 16px rgba(220,20,60,0.6);
+}

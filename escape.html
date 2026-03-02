@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Veil of Minds — Escape Room</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Creepster&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#080810;color:#c8b89a;font-family:'Crimson Text',serif;font-size:18px;min-height:100vh;overflow-x:hidden;position:relative;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.03) 0px,rgba(0,0,0,0.03) 1px,transparent 1px,transparent 2px);pointer-events:none;z-index:100;}
+
+/* GLITCH */
+#glitch-overlay{display:none;position:fixed;inset:0;z-index:999;background:#000;animation:glitchIn 0.1s steps(1) infinite;}
+#glitch-overlay.active{display:block;}
+@keyframes glitchIn{
+  0%{background:rgba(0,0,0,0.97);clip-path:inset(10% 0 80% 0);}
+  20%{background:rgba(180,0,0,0.3);clip-path:inset(60% 0 10% 0);}
+  40%{background:rgba(0,0,0,0.97);clip-path:inset(30% 0 50% 0);}
+  60%{background:rgba(0,0,50,0.5);clip-path:inset(80% 0 5% 0);}
+  80%{background:rgba(0,0,0,0.97);clip-path:inset(0% 0 90% 0);}
+  100%{background:rgba(0,0,0,0.97);clip-path:inset(45% 0 45% 0);}
+}
+
+/* BLACKOUT */
+#blackout{display:none;position:fixed;inset:0;z-index:1000;background:#000;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
+#blackout.active{display:flex;}
+#blackout h2{font-family:'Creepster',cursive;font-size:3rem;color:#8b0000;text-shadow:0 0 30px rgba(139,0,0,0.8);animation:flicker 0.5s infinite;margin-bottom:20px;}
+#blackout p{color:#3a2a2a;font-style:italic;font-size:1.1rem;margin-bottom:30px;max-width:500px;line-height:1.8;}
+@keyframes flicker{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* WIN */
+#win-screen{display:none;position:fixed;inset:0;z-index:1000;background:#000;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
+#win-screen.active{display:flex;}
+#win-screen h2{font-family:'Creepster',cursive;font-size:3.5rem;color:#c0392b;text-shadow:0 0 40px rgba(192,57,43,0.9);margin-bottom:16px;}
+#win-screen p{color:#7a6050;font-style:italic;font-size:1.1rem;max-width:520px;line-height:1.8;margin-bottom:30px;}
+
+/* BUTTON */
+.dark-btn{background:rgba(139,0,0,0.15);border:1px solid #8b0000;color:#c8b89a;padding:11px 28px;font-family:'Crimson Text',serif;font-size:1rem;letter-spacing:1px;cursor:pointer;border-radius:3px;transition:all 0.3s;}
+.dark-btn:hover{background:rgba(139,0,0,0.35);box-shadow:0 0 16px rgba(139,0,0,0.5);color:#fff;}
+
+/* HEADER */
+#site-header{text-align:center;padding:36px 20px 16px;}
+#site-header h1{font-family:'Creepster',cursive;font-size:clamp(2.5rem,8vw,5rem);color:#b52020;text-shadow:0 0 20px rgba(181,32,32,0.7),3px 3px 0 #0a0000;letter-spacing:4px;}
+#site-header .sub{color:#4a3a2a;font-style:italic;font-size:0.95rem;letter-spacing:2px;margin-top:6px;}
+.red-line{width:180px;height:1px;background:linear-gradient(to right,transparent,#8b0000,transparent);margin:16px auto;}
+
+/* TIMER */
+#timer-section{display:flex;align-items:center;justify-content:center;gap:16px;padding:6px 20px 16px;flex-wrap:wrap;}
+#timer-display{font-family:'Creepster',cursive;font-size:2.8rem;color:#c0392b;text-shadow:0 0 16px rgba(192,57,43,0.7);min-width:90px;text-align:center;transition:color 0.5s;}
+#timer-display.warning{color:#ff4500;animation:pulse 0.5s infinite;}
+@keyframes pulse{0%,100%{text-shadow:0 0 16px rgba(255,69,0,0.7);}50%{text-shadow:0 0 40px rgba(255,69,0,1);}}
+#timer-bar-wrap{flex:1;max-width:400px;background:rgba(255,255,255,0.05);border:1px solid rgba(139,0,0,0.3);border-radius:2px;height:8px;overflow:hidden;}
+#timer-bar{height:100%;width:100%;background:linear-gradient(to right,#8b0000,#c0392b);transition:width 1s linear,background 1s;}
+
+#clue-counter{font-size:0.85rem;letter-spacing:2px;color:#4a3a2a;text-align:center;margin-bottom:20px;}
+#clue-counter span{color:#c0392b;}
+
+/* INTRO */
+#intro{max-width:640px;margin:0 auto;padding:0 20px 40px;text-align:center;}
+.intro-box{border:1px solid rgba(139,0,0,0.25);border-radius:6px;background:rgba(10,3,3,0.7);padding:36px;position:relative;}
+.intro-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,#3d0000,#b52020,#3d0000);}
+.intro-box h2{font-family:'Creepster',cursive;font-size:1.8rem;color:#e0d0c0;margin-bottom:14px;}
+.intro-box p{color:#7a6a58;line-height:1.9;margin-bottom:18px;}
+.intro-box ul{list-style:none;margin-bottom:24px;text-align:left;display:inline-block;}
+.intro-box ul li{color:#5a4a3a;font-style:italic;padding:4px 0;font-size:0.95rem;}
+.intro-box ul li::before{content:'▸ ';color:#8b0000;}
+
+/* GAME */
+#game-area{display:none;max-width:920px;margin:0 auto;padding:0 20px 60px;}
+
+/* CLUE TRACKER */
+#clue-tracker{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:22px;}
+.clue-slot{border:1px solid rgba(139,0,0,0.2);border-radius:4px;background:rgba(8,3,3,0.7);padding:10px 4px;text-align:center;font-size:0.65rem;letter-spacing:1px;color:#2a1a1a;transition:all 0.4s;}
+.clue-slot.collected{border-color:rgba(139,0,0,0.6);color:#c0392b;background:rgba(139,0,0,0.1);box-shadow:0 0 10px rgba(139,0,0,0.3);}
+
+/* ROOMS */
+.room-section{border:1px solid rgba(139,0,0,0.2);border-radius:6px;background:rgba(8,3,3,0.8);padding:26px 30px;margin-bottom:20px;position:relative;}
+.room-section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(139,0,0,0.4),transparent);}
+.room-section h3{font-family:'Creepster',cursive;font-size:1.35rem;color:#c0a080;margin-bottom:12px;letter-spacing:1px;}
+.room-section p{color:#6a5a48;line-height:1.9;font-size:0.95rem;}
+
+/* OBJECTS */
+.obj{display:inline;color:#9b7050;border-bottom:1px dashed rgba(155,112,80,0.4);cursor:pointer;transition:all 0.3s;font-style:italic;}
+.obj:hover{color:#d0b090;border-bottom-color:#d0b090;text-shadow:0 0 8px rgba(208,176,144,0.4);}
+.obj.found{color:#2a3a2a;border-bottom-color:#2a3a2a;cursor:default;text-decoration:line-through;pointer-events:none;}
+
+/* POPUP */
+#clue-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:500;background:#080303;border:1px solid #8b0000;border-radius:6px;padding:32px 36px;max-width:440px;width:90%;text-align:center;box-shadow:0 0 50px rgba(139,0,0,0.5);animation:popIn 0.3s ease;}
+@keyframes popIn{from{transform:translate(-50%,-50%) scale(0.8);opacity:0;}to{transform:translate(-50%,-50%) scale(1);opacity:1;}}
+#clue-popup.active{display:block;}
+#popup-num{font-size:0.68rem;letter-spacing:3px;color:#6b0000;text-transform:uppercase;margin-bottom:8px;}
+#popup-title{font-family:'Creepster',cursive;font-size:1.6rem;color:#e0d0c0;margin-bottom:12px;}
+#popup-body{color:#7a6050;line-height:1.85;font-size:0.95rem;margin-bottom:22px;font-style:italic;}
+#popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:499;}
+#popup-overlay.active{display:block;}
+</style>
+</head>
+<body>
+
+<div id="glitch-overlay"></div>
+
+<div id="blackout">
+  <h2>SIGNAL LOST</h2>
+  <p>"You stayed too long inside the veil. The forest has closed around you. Some doors only open once — and yours just locked from the outside."</p>
+  <button class="dark-btn" onclick="resetGame()">↺ Try Again</button>
+</div>
+
+<div id="win-screen">
+  <h2>YOU ESCAPED</h2>
+  <p id="win-msg"></p>
+  <button class="dark-btn" onclick="resetGame()">↺ Play Again</button>
+</div>
+
+<div id="clue-popup">
+  <div id="popup-num"></div>
+  <div id="popup-title"></div>
+  <div id="popup-body"></div>
+  <button class="dark-btn" onclick="closePopup()">Pocket the clue</button>
+</div>
+<div id="popup-overlay" onclick="closePopup()"></div>
+
+<!-- HEADER -->
+<header id="site-header">
+  <h1>Veil of Minds</h1>
+  <p class="sub">— Escape Room —</p>
+  <div class="red-line"></div>
+</header>
+
+<!-- TIMER -->
+<div id="timer-section">
+  <div id="timer-display">3:00</div>
+  <div id="timer-bar-wrap"><div id="timer-bar"></div></div>
+</div>
+<div id="clue-counter">Clues found: <span id="found-count">0</span> / 10</div>
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="intro-box">
+    <h2>You are locked inside.</h2>
+    <p>Someone brought you here. You don't remember who. You don't remember why. The room smells like old paper and something burnt. The clock is already running.</p>
+    <ul>
+      <li>Find all 10 hidden clues before time runs out</li>
+      <li>Click on objects in each room to examine them</li>
+      <li>Some objects look ordinary. They are not.</li>
+      <li>You have exactly 3 minutes. The forest is watching.</li>
+    </ul>
+    <button class="dark-btn" onclick="startGame()">Enter the Room</button>
+  </div>
+</div>
+
+<!-- GAME AREA -->
+<div id="game-area">
+
+  <div id="clue-tracker">
+    <div class="clue-slot" id="slot-0">CLUE 1</div>
+    <div class="clue-slot" id="slot-1">CLUE 2</div>
+    <div class="clue-slot" id="slot-2">CLUE 3</div>
+    <div class="clue-slot" id="slot-3">CLUE 4</div>
+    <div class="clue-slot" id="slot-4">CLUE 5</div>
+    <div class="clue-slot" id="slot-5">CLUE 6</div>
+    <div class="clue-slot" id="slot-6">CLUE 7</div>
+    <div class="clue-slot" id="slot-7">CLUE 8</div>
+    <div class="clue-slot" id="slot-8">CLUE 9</div>
+    <div class="clue-slot" id="slot-9">CLUE 10</div>
+  </div>
+
+  <!-- ROOM 1 -->
+  <div class="room-section">
+    <h3>🕯 The Study</h3>
+    <p>
+      A desk buried under papers, dust, and regret. The lamp flickers like it's trying to say something. A <span class="obj" id="o0" onclick="find(0,'o0')">leather journal</span> lies open to the last page. Next to it, a cold <span class="obj" id="o1" onclick="find(1,'o1')">coffee cup</span> with something dried on the inside rim. On the wall, a <span class="obj" id="o2" onclick="find(2,'o2')">painting of a forest</span> — the trees are wrong. Too many. Too close. Beneath the desk, half-hidden, a <span class="obj" id="o3" onclick="find(3,'o3')">torn photograph</span> of someone who looks exactly like you.
+    </p>
+  </div>
+
+  <!-- ROOM 2 -->
+  <div class="room-section">
+    <h3>🚪 The Corridor</h3>
+    <p>
+      Seven doors. Only one is unlocked — the one behind you. At the far end, a <span class="obj" id="o4" onclick="find(4,'o4')">cracked mirror</span> shows a corridor with eight doors. A <span class="obj" id="o5" onclick="find(5,'o5')">coat on the hook</span> has a name tag written in handwriting you don't recognize. The <span class="obj" id="o6" onclick="find(6,'o6')">scratches on the floor</span> spell something if you tilt your head. Near the skirting board, a <span class="obj" id="o7" onclick="find(7,'o7')">folded note</span> has been slid under Door 4.
+    </p>
+  </div>
+
+  <!-- ROOM 3 -->
+  <div class="room-section">
+    <h3>🧠 The Clinic Room</h3>
+    <p>
+      White walls gone grey. A metal chair. A <span class="obj" id="o8" onclick="find(8,'o8')">case file on the table</span> — stamped CLOSED, but the clasp is undone. On the ceiling, written in something dark, is a <span class="obj" id="o9" onclick="find(9,'o9')">single sentence</span> you have to stand directly beneath to read.
+    </p>
+  </div>
+
+</div>
+
+<script>
+const CLUES = [
+  {num:"CLUE 01", title:"The Last Entry", text:"The journal's final page: 'Day 47. The subject no longer responds to their name. When shown a mirror, the subject says — that is not me. That has never been me.' The handwriting is yours."},
+  {num:"CLUE 02", title:"The Message in the Cup", text:"Written in dried coffee on the inner rim, in tiny careful letters: 'You were not brought here. You never left. Check the date on the journal.' The date on the journal is today."},
+  {num:"CLUE 03", title:"Behind the Painting", text:"You lift the painting. Behind it, carved into the plaster: the number 7. Below it: ROOM. Below that: DON'T OPEN. Below even that, so small you almost miss it: too late."},
+  {num:"CLUE 04", title:"The Photograph", text:"The torn photograph shows you, standing in this room, taken from behind. You are looking at the desk. The desk is empty in the photo. The journal isn't there yet. The photo is dated three years from now."},
+  {num:"CLUE 05", title:"The Extra Door", text:"The mirror shows Door 8. In reality there are only 7. You press your hand where Door 8 should be. The glass is warm. Something presses back from the other side. It matches your handprint exactly."},
+  {num:"CLUE 06", title:"The Name Tag", text:"The coat's name tag reads your name. Below it, a date — three years ago. Below the date, in red ink: STILL HERE. STILL WAITING. The coat is warm, as though someone just removed it."},
+  {num:"CLUE 07", title:"The Floor Message", text:"The scratches, read sideways, say: WAKE UP. You have been reading them upside down this whole time. When you stand correctly, you notice a second message scratched below the first: YOU ALREADY DID."},
+  {num:"CLUE 08", title:"The Note Under Door 4", text:"The note reads: 'If you are reading this, you found the corridor. Good. Now listen carefully — do not open Door 4. Whatever you hear on the other side is not what you think it is. It is not asking for help. It is practising.'"},
+  {num:"CLUE 09", title:"The Case File", text:"Inside the file: 47 session notes, all about the same patient. The patient's name is redacted on every page except the last, where someone circled it in red. The circle is there. The name underneath has been torn out. The torn piece is in your pocket."},
+  {num:"CLUE 10", title:"The Sentence on the Ceiling", text:"Standing directly beneath it, you read: 'The subject was never a patient. The subject was always the doctor. The subject has been writing these files about themselves for three years and does not remember starting.' You look at your hands. You are holding a pen."}
+];
+
+let timerInterval = null;
+let timeLeft = 180;
+let cluesFound = 0;
+let gameActive = false;
+
+function startGame() {
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('game-area').style.display = 'block';
+  gameActive = true;
+  runTimer();
+}
+
+function runTimer() {
+  timerInterval = setInterval(() => {
+    if (!gameActive) return;
+    timeLeft--;
+    updateDisplay();
+    if (timeLeft <= 0) { clearInterval(timerInterval); triggerGameOver(); }
+  }, 1000);
+}
+
+function updateDisplay() {
+  const m = Math.floor(timeLeft / 60);
+  const s = timeLeft % 60;
+  document.getElementById('timer-display').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  document.getElementById('timer-bar').style.width = ((timeLeft / 180) * 100) + '%';
+  const bar = document.getElementById('timer-bar');
+  const disp = document.getElementById('timer-display');
+  if (timeLeft <= 30) {
+    bar.style.background = '#ff2200';
+    disp.classList.add('warning');
+  } else if (timeLeft <= 60) {
+    bar.style.background = 'linear-gradient(to right,#8b0000,#ff4500)';
+  }
+}
+
+function find(index, objId) {
+  const obj = document.getElementById(objId);
+  if (obj.classList.contains('found')) return;
+  obj.classList.add('found');
+  cluesFound++;
+  document.getElementById('found-count').textContent = cluesFound;
+  const slot = document.getElementById('slot-' + index);
+  slot.classList.add('collected');
+  slot.textContent = '✓';
+  showPopup(CLUES[index]);
+  if (cluesFound >= 10) setTimeout(() => { closePopup(); triggerWin(); }, 500);
+}
+
+function showPopup(c) {
+  document.getElementById('popup-num').textContent = c.num;
+  document.getElementById('popup-title').textContent = c.title;
+  document.getElementById('popup-body').textContent = c.text;
+  document.getElementById('clue-popup').classList.add('active');
+  document.getElementById('popup-overlay').classList.add('active');
+}
+
+function closePopup() {
+  document.getElementById('clue-popup').classList.remove('active');
+  document.getElementById('popup-overlay').classList.remove('active');
+}
+
+function triggerGameOver() {
+  gameActive = false;
+  document.getElementById('glitch-overlay').classList.add('active');
+  setTimeout(() => {
+    document.getElementById('glitch-overlay').classList.remove('active');
+    document.getElementById('blackout').classList.add('active');
+  }, 2000);
+}
+
+function triggerWin() {
+  gameActive = false;
+  clearInterval(timerInterval);
+  const used = 180 - timeLeft;
+  const m = Math.floor(used / 60);
+  const s = used % 60;
+  document.getElementById('win-msg').textContent =
+    'All 10 clues recovered in ' + m + ':' + (s < 10 ? '0' : '') + s + '. You remember now. You remember everything. The door at the end of the corridor — Door 8, the one that wasn\'t there — is open. Whether you walk through it is up to you.';
+  document.getElementById('win-screen').classList.add('active');
+}
+
+function resetGame() {
+  clearInterval(timerInterval);
+  timeLeft = 180; cluesFound = 0; gameActive = false;
+  document.getElementById('blackout').classList.remove('active');
+  document.getElementById('win-screen').classList.remove('active');
+  document.getElementById('glitch-overlay').classList.remove('active');
+  document.getElementById('found-count').textContent = '0';
+  document.getElementById('timer-display').textContent = '3:00';
+  document.getElementById('timer-display').classList.remove('warning');
+  document.getElementById('timer-bar').style.width = '100%';
+  document.getElementById('timer-bar').style.background = 'linear-gradient(to right,#8b0000,#c0392b)';
+  for (let i = 0; i < 10; i++) {
+    const s = document.getElementById('slot-' + i);
+    s.classList.remove('collected');
+    s.textContent = 'CLUE ' + (i + 1);
+  }
+  document.querySelectorAll('.obj').forEach(o => o.classList.remove('found'));
+  document.getElementById('game-area').style.display = 'none';
+  document.getElementById('intro').style.display = 'block';
+}
+</script>
+</body>
+</html>
